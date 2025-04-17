@@ -177,7 +177,7 @@ dfo_sara_bc_bulltrout_remove = dfo_sara_bc_bulltrout |>
 dfo_sara_bc = dfo_sara_bc |>
   dplyr::bind_rows(scbt_t |> sf::st_transform(crs = sf::st_crs(dfo_sara_bc)))
 
-ggplot() + geom_sf(data = sar_c)
+ggplot() + geom_sf(data = dfo_sara_bc)
 
 dfo_sara_bc |> sf::write_sf("output/dfo_sara_occurrences_in_BC_all_species.gpkg")
 
