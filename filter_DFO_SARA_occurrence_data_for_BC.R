@@ -2,9 +2,19 @@
 #
 # Date: 2024-08-22
 #
-# Author(s): Chris Madsen (chris.madsen@gov.bc.ca)
+# Author(s): Chris Madsen (chris.madsen@gov.bc.ca) and John Phelan
 #
-# Description: This script ...
+# Description: This script takes a data download of DFO Species-at-Risk
+# spatial data and filters it for just freshwater aquatic species in BC.
+# It also simplifies the geometry of Bull Trout in the North / NE of BC,
+# which greatly reduces the file size.
+#
+# Products: One geopackage "dfo_sara_critical_habitat_bc.gpkg", in outputs/ folder
+#
+# To-do:
+# 1. Convert to Markdown to make HTML file.
+# 2. Add section that incorporates Bull Trout (South Coast?) population polygon.
+# 3. Move this project (or its output file at least) to a OneDrive folder, share that with Charlotte and Caitlyn (and others?)
 
 library(sf)
 library(readxl)
@@ -23,6 +33,10 @@ ensure_multipolygons <- function(X) {
 }
 
 bc = bcmaps::bc_bound() |> dplyr::summarise()
+
+base_dir = stringr::str_extract(getwd(),"C:\\/Users\\/[a-zA-Z]+")
+onedrive_wd = paste0(str_extract(getwd(),"C:/Users/[A-Z]+/"),"OneDrive - Government of BC/data/")
+lan_root = "//SFP.IDIR.BCGOV/S140/S40203/RSD_ FISH & AQUATIC HABITAT BRANCH/General/"
 
 #Split occurrence data by Species
 dfo_sara_occ_data = st_read(dsn = 'data/Distribution_Repartition/Distribution_FGP.gdb/',
@@ -131,21 +145,62 @@ dfo_sara_bc = list.files(path = 'data/dfo_occ_data_by_species_BC/',
   lapply(\(x) sf::read_sf(x)) |>
   dplyr::bind_rows()
 
+# Append the more recently received South Coast Bull Trout polygon.
+
+bc = bcmaps::bc_bound()
+
+scbt = sf::read_sf(paste0(base_dir,"/Downloads/wetransfer_south-coast-bull-trout-gis-files_2025-02-13_0022/BTDesignatableUnits.shp"))
+
+scbt_t = sf::st_intersection(scbt, bc)
+
+scbt_t = scbt_t[scbt_t$Designatab == "DU1 - Southcoast BC populations",]
+
+scbt_t = scbt_t |> sf::st_transform(4326)
+
+scbt_t = scbt_t |>
+  dplyr::summarise(Common_Name_EN = "Bull Trout",
+                   Scientific_Name = 'Salvelinus confluentus',
+                   Population_EN = 'South Coast',
+                   Taxon = 'Fishes',
+                   Ecotype = 'Freshwater') |>
+  dplyr::rename(geom = geometry)
+
+ggplot() + geom_sf(data = scbt_t, aes(fill = Common_Name_EN))
+
+# remove bull trout points that fall within the new polygon.
+dfo_sara_bc_bulltrout = dplyr::filter(dfo_sara_bc, Common_Name_EN == "Bull Trout")
+
+dfo_sara_bc_bulltrout_remove = dfo_sara_bc_bulltrout |>
+  sf::st_filter(scbt_t |> sf::st_transform(crs = sf::st_crs(dfo_sara_bc_bulltrout)))
+# No bull trout points here! Just add on the new south coast polygon.
+
+dfo_sara_bc = dfo_sara_bc |>
+  dplyr::bind_rows(scbt_t |> sf::st_transform(crs = sf::st_crs(dfo_sara_bc)))
+
+ggplot() + geom_sf(data = sar_c)
+
 dfo_sara_bc |> sf::write_sf("output/dfo_sara_occurrences_in_BC_all_species.gpkg")
+
+# Drop marine species
+d_no_marine = dfo_sara_bc |>
+  dplyr::filter(Eco_Type != 'Marine')
+
+sf::write_sf(d_no_marine, "output/dfo_sara_occurrences_in_BC_no_marine.gpkg")
 
 # Filter for just Fraser and Columbia priority areas
 fras = sf::read_sf("W:/CMadsen/shared_data_sets/Fraser_River_Big_Watershed.shp")
 columbia = sf::read_sf("W:/CMadsen/shared_data_sets/Columbia_River_Big_Watershed.shp")
-ggplot() + geom_sf(data = fras) + geom_sf(data = columbia)
+# ggplot() + geom_sf(data = fras) + geom_sf(data = columbia)
 
 fras_col = dplyr::bind_rows(fras, columbia) |> dplyr::summarise()
 
-dfo_sara_bc_fras_col = sf::st_intersection(dfo_sara_bc, fras_col |> sf::st_transform(sf::st_crs(dfo_sara_bc)))
+dfo_sara_bc_fras_col = sf::st_intersection(d_no_marine, fras_col |> sf::st_transform(sf::st_crs(dfo_sara_bc)))
 
 dfo_sara_bc_fras_col |> sf::write_sf("output/dfo_sara_occurrences_in_col_fras_watersheds.gpkg")
 
 ggplot() + geom_sf(data = fras) + geom_sf(data = columbia) + geom_sf(data = dfo_sara_bc_fras_col)
 
+# Read in national critical habitat;
 # Convert the critical habitat from geodatabase into a geopackage
 crithab = sf::st_read("data/CriticalHabitat_FGP.gdb/", layer = "DFO_SARA_CritHab_2022_FGP_EN")
 
@@ -162,3 +217,13 @@ ggplot() +
   geom_sf(data = crithab_bc, fill = 'green')
 
 sf::write_sf(crithab_bc, "dfo_sara_critical_habitat_bc.gpkg")
+
+## Copy output files to onedrive.
+list.files(path = "output") |>
+  purrr::iwalk( ~ {
+    if(!.x %in% c("federal_critical_habitat.gpkg")){
+      file.copy(from = paste0("output/",.x),
+                to = paste0(onedrive_wd,"DFO_SARA/",.x),
+                overwrite = T)
+    }
+  })
