@@ -149,7 +149,7 @@ dfo_sara_bc = list.files(path = 'data/dfo_occ_data_by_species_BC/',
 
 bc = bcmaps::bc_bound()
 
-scbt = sf::read_sf(paste0(base_dir,"/Downloads/wetransfer_south-coast-bull-trout-gis-files_2025-02-13_0022/BTDesignatableUnits.shp"))
+scbt = sf::read_sf(paste0(onedrive_wd,"DFO_SARA/wetransfer_south-coast-bull-trout-gis-files_2025-02-13_0022/BTDesignatableUnits.shp"))
 
 scbt_t = sf::st_intersection(scbt, bc)
 
