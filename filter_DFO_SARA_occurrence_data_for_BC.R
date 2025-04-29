@@ -39,7 +39,7 @@ onedrive_wd = paste0(str_extract(getwd(),"C:/Users/[A-Z]+/"),"OneDrive - Governm
 lan_root = "//SFP.IDIR.BCGOV/S140/S40203/RSD_ FISH & AQUATIC HABITAT BRANCH/General/"
 
 #Split occurrence data by Species
-dfo_sara_occ_data = st_read(dsn = 'data/Distribution_Repartition/Distribution_FGP.gdb/',
+dfo_sara_occ_data = st_read(dsn = paste0(onedrive_wd,'DFO_SARA/Distribution_Repartition/Distribution_FGP.gdb/'),
                             layer = 'DFO_SARA_Dist_2023_FGP_EN')
 
 dfo_sara_occ_data = dplyr::rename(dfo_sara_occ_data, geom = Shape)
