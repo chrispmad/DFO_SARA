@@ -50,18 +50,18 @@ purrr::iwalk(unique(dfo_sara_occ_data$Common_Name_EN), ~ {
                paste0("data/dfo_occ_data_by_species/dfo_occ_",stringr::str_to_lower(.x),".gpkg"))
 })
 
-# Clean up Bull Trout data - merge a bunch of stream geometries into one shape I
-# made by hand in QGIS.
-bt_big_shape = sf::read_sf("data/handmade_bulltrout_NE_BC_polygon.gpkg")
-
+# # Clean up Bull Trout data - merge a bunch of stream geometries into one shape I
+# # made by hand in QGIS.
+# bt_big_shape = sf::read_sf("data/handmade_bulltrout_NE_BC_polygon.gpkg")
+#
 bt = sf::read_sf("data/dfo_occ_data_by_species/dfo_occ_bull trout.gpkg")
 
 bc_pseudomerc = sf::st_transform(bc, st_crs(bt))
 
 bc_bbox = sf::st_as_sf(sf::st_as_sfc(sf::st_bbox(bc_pseudomerc)))
-
-# Trim to BC.
-bt = bt |> sf::st_filter(bc_bbox)
+#
+# # Trim to BC.
+# bt = bt |> sf::st_filter(bc_bbox)
 
 #started at 1:41 PM...
 
@@ -180,6 +180,7 @@ dfo_sara_bc = dfo_sara_bc |>
 ggplot() + geom_sf(data = dfo_sara_bc)
 
 dfo_sara_bc |> sf::write_sf("output/dfo_sara_occurrences_in_BC_all_species.gpkg")
+dfo_sara_bc |> sf::write_sf("../sarpy/data/dfo_sara_occurrences_in_BC_all_species.gpkg")
 
 # Drop marine species
 d_no_marine = dfo_sara_bc |>
