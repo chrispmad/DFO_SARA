@@ -60,6 +60,7 @@ purrr::iwalk(unique(dfo_sara_occ_data$Common_Name_EN), ~ {
 # bt = bt |> sf::st_filter(bc_bbox)
 
 #started at 1:41 PM...
+bt = sf::st_read(paste0("data/dfo_occ_data_by_species/dfo_occ_bull trout.gpkg"))
 
 # Replace complex bulltrout geometry with the giant bulltrout polygon I drew.
 bt_big_shape = sf::read_sf(paste0(onedrive_wd,"DFO_SARA/handmade_bulltrout_NE_BC_polygon.gpkg"))
