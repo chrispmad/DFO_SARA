@@ -87,9 +87,10 @@ bt_outside_polygon = bt_outside_polygon |> sf::st_intersection(bc_pseudomerc)
 
 ggplot() + geom_sf(data = bc) + geom_sf(data = bt_outside_polygon)
 
-sf::write_sf(bt_outside_polygon, paste0(onedrive_wd,"DFO_SARA/dfo_occ_data_by_species_BC/dfo_occ_bull trout.gpkg"))
+# sf::write_sf(bt_outside_polygon, paste0(onedrive_wd,"DFO_SARA/dfo_occ_data_by_species_BC/dfo_occ_bull trout.gpkg"))
 
-bt = sf::read_sf(paste0(onedrive_wd,"DFO_SARA/dfo_occ_data_by_species/dfo_occ_bull trout.gpkg"))
+# bt = sf::read_sf(paste0(onedrive_wd,"DFO_SARA/dfo_occ_data_by_species/dfo_occ_bull trout.gpkg"))
+bt = bt_outside_polygon
 
 bc_pseudomerc = sf::st_transform(bc, st_crs(bt))
 
@@ -208,7 +209,8 @@ ggplot() + geom_sf(data = fras) + geom_sf(data = columbia) + geom_sf(data = dfo_
 
 # Read in national critical habitat;
 # Convert the critical habitat from geodatabase into a geopackage
-crithab = sf::st_read("data/CriticalHabitat_FGP.gdb/", layer = "DFO_SARA_CritHab_2022_FGP_EN")
+# crithab = sf::st_read("data/CriticalHabitat_FGP.gdb/", layer = "DFO_SARA_CritHab_2022_FGP_EN")
+crithab = sf::st_read(paste0(onedrive_wd, "DFO_SARA/CriticalHabitat_FGP.gdb/"), layer = "DFO_SARA_CritHab_2022_FGP_EN")
 
 crithab = ensure_multipolygons(crithab)
 
