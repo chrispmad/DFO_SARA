@@ -54,11 +54,7 @@ purrr::iwalk(unique(dfo_sara_occ_data$Common_Name_EN), ~ {
 # # made by hand in QGIS.
 # bt_big_shape = sf::read_sf("data/handmade_bulltrout_NE_BC_polygon.gpkg")
 #
-bt = sf::read_sf("data/dfo_occ_data_by_species/dfo_occ_bull trout.gpkg")
 
-bc_pseudomerc = sf::st_transform(bc, st_crs(bt))
-
-bc_bbox = sf::st_as_sf(sf::st_as_sfc(sf::st_bbox(bc_pseudomerc)))
 #
 # # Trim to BC.
 # bt = bt |> sf::st_filter(bc_bbox)
@@ -66,7 +62,7 @@ bc_bbox = sf::st_as_sf(sf::st_as_sfc(sf::st_bbox(bc_pseudomerc)))
 #started at 1:41 PM...
 
 # Replace complex bulltrout geometry with the giant bulltrout polygon I drew.
-bt_big_shape = sf::read_sf("data/handmade_bulltrout_NE_BC_polygon.gpkg")
+bt_big_shape = sf::read_sf(paste0(onedrive_wd,"DFO_SARA/handmade_bulltrout_NE_BC_polygon.gpkg"))
 
 bt_big_shape = st_transform(bt_big_shape, st_crs(bt))
 
@@ -89,8 +85,13 @@ bt_outside_polygon = bt_outside_polygon |> sf::st_intersection(bc_pseudomerc)
 
 ggplot() + geom_sf(data = bc) + geom_sf(data = bt_outside_polygon)
 
-sf::write_sf(bt_outside_polygon, "data/dfo_occ_data_by_species_BC/dfo_occ_bull trout.gpkg")
+sf::write_sf(bt_outside_polygon, paste0(onedrive_wd,"DFO_SARA/dfo_occ_data_by_species_BC/dfo_occ_bull trout.gpkg"))
 
+bt = sf::read_sf(paste0(onedrive_wd,"DFO_SARA/dfo_occ_data_by_species/dfo_occ_bull trout.gpkg"))
+
+bc_pseudomerc = sf::st_transform(bc, st_crs(bt))
+
+bc_bbox = sf::st_as_sf(sf::st_as_sfc(sf::st_bbox(bc_pseudomerc)))
 # Now that the bull trout occurrence data (which came in at a whopping 3GB or so)
 # has been vastly cleaned up, we can proceed with the other species.
 
