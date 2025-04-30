@@ -82,6 +82,7 @@ bt_outside_polygon = dplyr::bind_rows(
 )
 
 # Now trim to BC.
+bc_pseudomerc <- bc |> sf::st_transform(3857)
 bt_outside_polygon = bt_outside_polygon |> sf::st_intersection(bc_pseudomerc)
 
 ggplot() + geom_sf(data = bc) + geom_sf(data = bt_outside_polygon)
